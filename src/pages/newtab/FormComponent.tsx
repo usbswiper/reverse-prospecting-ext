@@ -18,7 +18,9 @@ class FormComponent extends React.Component {
                 sqft: null,
                 listedAt: null,
                 city: null,
-                file: null
+                file: null,
+                custom_mls_number: null,
+                website_link: null,
                 // bedrooms: 10,
                 // bathrooms: 11,
                 // sqft: 1360,
@@ -181,6 +183,12 @@ class FormComponent extends React.Component {
                                         <input type={"text"} value={this.state.formData["email_notes_1"]} name={"email_notes_1"} className={"form-control"} onChange={(event) => this.handleUserInput(event)}/>
                                     </td>
                                 </tr>
+                                <tr className={'custom_mls_number' in this.state.errors ? 'field-error' : ''}>
+                                    <td>Custom MLS Number</td>
+                                    <td>
+                                        <input type={"text"} value={this.state.formData["custom_mls_number"]} name={"custom_mls_number"} className={"form-control"} onChange={(event) => this.handleUserInput(event)}/>
+                                    </td>
+                                </tr>
                                 <tr className={'city' in this.state.errors ? 'field-error' : ''}>
                                     <td>City</td>
                                     <td>
@@ -209,6 +217,12 @@ class FormComponent extends React.Component {
                                     <td>Listed at (Price)</td>
                                     <td>
                                         <input type={"text"} value={this.state.formData["listedAt"]} name={"listedAt"} className={"form-control"} onChange={(event) => this.handleUserInput(event)}/>
+                                    </td>
+                                </tr>
+                                <tr className={'website_link' in this.state.errors ? 'field-error' : ''}>
+                                    <td>Website Link</td>
+                                    <td>
+                                        <input type={"text"} value={this.state.formData["website_link"]} name={"website_link"} className={"form-control"} onChange={(event) => this.handleUserInput(event)}/>
                                     </td>
                                 </tr>
                                 <tr className={'file' in this.state.errors ? 'field-error' : ''}>
