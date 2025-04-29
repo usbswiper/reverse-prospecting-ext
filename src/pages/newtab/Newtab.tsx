@@ -333,7 +333,7 @@ class Newtab extends React.Component {
     }
 
     parseHtmlData(content: string) {
-        let emailList = [];
+        let emailList = {};
         try {
             //let content = document.documentElement.outerHTML;
             const tables = content.match(
@@ -357,7 +357,8 @@ class Newtab extends React.Component {
                         }
                         return tdContent;
                     });
-                emailList.push({
+                let uniqueId = td[4].email + '_' + td[6];
+                emailList[uniqueId] = {
                     mls: td[1][1],
                     address: td[2],
                     agentName: td[3][1],
@@ -368,11 +369,12 @@ class Newtab extends React.Component {
                     searchId: td[7],
                     //emailed: td[9].replace(/<\/?[^>]+(>|$)/g, ""),
                     isChecked: true,
-                });
+                };
             }
         } catch (error) {
 
         }
+        emailList = Object.values(emailList);
         if (emailList.length) {
             this.setState({ emailList: emailList, allChecked: true });
         } else {
