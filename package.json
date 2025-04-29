@@ -1,6 +1,6 @@
 {
   "name": "mls-bulk-email-sender",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Helps the property dealers to send the bulk emails from Reverse prospect search results",
   "license": "MIT",
   "scripts": {
