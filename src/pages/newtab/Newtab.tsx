@@ -346,13 +346,20 @@ class Newtab extends React.Component {
                     .match(/<td.*?>(.*?)<\/td>/gims)
                     .map((val: string) => {
                         const tdContent = val.replace(/<td.*?>|<\/td>/gims, "");
+                        // The recipient cell may expose its mailto through an href
+                        // or, on the current ConnectMLS page, inside an onclick
+                        // handler such as window.open('mailto:...','_blank'). Look
+                        // for the mailto anywhere in the cell, not just the href.
+                        if (/mailto:/i.test(tdContent)) {
+                            const mailto: any = this.getMailto(tdContent);
+                            if (mailto.email) {
+                                return mailto;
+                            }
+                        }
                         const atag = /<a.*?(href="(.+?)")?>(.+)<\/a>/gims.exec(
                             tdContent
                         );
                         if (atag && atag.length) {
-                            if (atag[2].indexOf("mailto:") > -1) {
-                                return this.getMailto(atag[2]);
-                            }
                             return [atag[2], atag[3]];
                         }
                         return tdContent;
@@ -387,22 +394,40 @@ class Newtab extends React.Component {
     }
 
     getMailto(s) {
-        const r = {};
-        let email = s.match(/mailto:([^\?]*)/);
-        email = email[1] ? email[1] : false;
-        let subject = s.match(/subject=([^&]+)/);
-        subject = subject ? subject[1].replace(/\+/g, " ") : false;
-        let body = s.match(/body=([^&]+)/);
-        body = body ? body[1].replace(/\+/g, " ") : false;
+        const r: any = {};
+        // Isolate the mailto URI, stopping at the wrapping quote so any trailing
+        // script (e.g. "', '_blank');return false;") from an onclick handler is
+        // excluded. Handles both the quoted-in-onclick form used by the current
+        // ConnectMLS page and the older bare-href form.
+        const uriMatch = s.match(/mailto:([^'"]+)/i);
+        if (!uriMatch) {
+            return r;
+        }
+        const uri = uriMatch[1];
+        const decode = (value: string) => {
+            try {
+                return decodeURIComponent(value);
+            } catch (e) {
+                return value;
+            }
+        };
+        const queryIndex = uri.indexOf("?");
+        const email = (queryIndex === -1 ? uri : uri.slice(0, queryIndex)).trim();
+        const query = queryIndex === -1 ? "" : uri.slice(queryIndex + 1);
 
         if (email) {
-            r["email"] = email;
+            r["email"] = decode(email);
         }
+        // ConnectMLS now percent-encodes the subject (%20, %2F, %3A, ...); older
+        // pages used literal text with "+" for spaces. Decode both safely so the
+        // subject crosses to the service as plain text.
+        const subject = query.match(/(?:^|&(?:amp;)?)subject=([^&]*)/i);
         if (subject) {
-            r["subject"] = subject;
+            r["subject"] = decode(subject[1].replace(/\+/g, " "));
         }
+        const body = query.match(/(?:^|&(?:amp;)?)body=([^&]*)/i);
         if (body) {
-            r["body"] = body;
+            r["body"] = decode(body[1].replace(/\+/g, " "));
         }
 
         return r;
